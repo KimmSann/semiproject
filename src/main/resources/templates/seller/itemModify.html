@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<!-- CSS only -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<title>상품 수정 페이지</title>
+</head>
+
+<body>
+	<!-- Navigation-->
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container px-4 px-lg-5">
+			<a class="navbar-brand" th:href="@{/main}">연지의 쇼핑몰</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+					<li class="nav-item"><a class="nav-link active" aria-current="page" th:href="@{/main}">Home</a></li>
+					<li class="nav-item"><a class="nav-link" href="#" th:href="@{/item/new}">Upload</a></li>
+					<li class="nav-item"><a class="nav-link" href="#"
+							th:href="@{/seller/manage/{id}(id=${user.getId()})}">Manage</a></li>
+				</ul>
+				<form class="d-flex">
+					<a class="btn btn-outline-dark" href="#" th:text="|현재수익 : ${user.getCoin()} ₩|">
+						현재잔액 : 10000 ₩
+					</a>
+					<a class="btn btn-outline-dark" th:href="@{/seller/{id}(id=${user.getId()})}"
+						th:text="|${user.getName()}님 환영합니다.|">
+						판매자 페이지
+					</a>
+					<a class="btn btn-outline-dark" th:href="@{/logout}">
+						로그아웃
+					</a>
+				</form>
+			</div>
+		</div>
+	</nav>
+	<div class="container">
+		<main>
+			<div class="py-5 text-center">
+				<h2>상품 수정</h2>
+			</div>
+			<hr />
+			<div class="col-md-7 col-lg-8">
+				<form th:action="@{/item/modify/pro/{id}(id=${item.id})}" method="post" enctype="multipart/form-data">
+					<div class="row g-3">
+						<hr />
+						<div class="col-12">
+							<label class="form-label" for="isSoldout">상품 상태</label><br />
+							<input type="radio" name="isSoldout" id="isSoldout" value="0">판매중<br />
+							<input type="radio" name="isSoldout" id="isSoldout" value="1">품절<br />
+							<div class="invalid-feedback">
+								Input is empty.
+							</div>
+						</div>
+						<div class="col-12">
+							<label for="name" class="form-label">상품 이름</label>
+							<input type="text" class="form-control" id="name" name="name"
+								th:placeholder="${item.getName()}">
+							<div class="invalid-feedback">
+								Your name is required.
+							</div>
+						</div>
+						<div class="col-12">
+							<label for="text" class="form-label">상품 설명</label>
+							<input type="text" class="form-control" name="text" id="text"
+								th:placeholder="${item.getText()}">
+							<div class="invalid-feedback">
+								Input is empty.
+							</div>
+						</div>
+						<div class="col-12">
+							<label for="price" class="form-label">상품 가격</label>
+							<input type="text" class="form-control" id="price" name="price"
+								th:placeholder="${item.getPrice()}">
+							<div class="invalid-feedback">
+								Input is empty.
+							</div>
+						</div>
+						<div class="col-12">
+							<label for="stock" class="form-label">상품 재고</label>
+							<input type="text" class="form-control" id="stock" name="stock"
+								th:placeholder="${item.getStock()}">
+							<div class="invalid-feedback">
+								Input is empty.
+							</div>
+						</div>
+						<div class="col-12">
+							<label for="text" class="form-label">상품 이미지 업로드</label>
+							<input type="file" class="form-control" id="imgFile" name="imgFile">
+							<div class="invalid-feedback">
+								Input is empty.
+							</div>
+						</div>
+					</div>
+					<hr class="my-4">
+					<button class="w-100 btn btn-primary btn-lg mb-3" type="submit">상품 수정</button>
+				</form>
+			</div>
+		</main>
+
+		<footer class="my-5 pt-5 text-muted text-center text-small">
+			<p class="mb-1">&copy; Kim's shop</p>
+		</footer>
+	</div>
+
+</body>
+
+</html>
