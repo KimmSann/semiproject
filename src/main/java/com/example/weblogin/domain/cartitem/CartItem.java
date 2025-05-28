@@ -14,7 +14,7 @@ import lombok.*;
 @Entity
 public class CartItem {
 
-    @jakarta.persistence.Id // ✅ 변경된 부분: 정확한 JPA용 @Id 사용
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -36,7 +36,6 @@ public class CartItem {
         return cartItem;
     }
 
-    // 이미 담겨있는 물건 또 담을 경우 수량 증가
     public void addCount(int count) {
         this.count += count;
     }

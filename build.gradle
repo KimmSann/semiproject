@@ -37,12 +37,16 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-parameters"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }

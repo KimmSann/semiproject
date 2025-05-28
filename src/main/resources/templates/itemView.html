@@ -37,9 +37,7 @@
 							sec:authorize="!isAuthenticated()">Home</a></li>
 					<li class="nav-item"><a class="nav-link" href="#" th:href="@{/item/new}"
 							sec:authorize="hasRole('ROLE_SELLER')">Upload</a></li>
-					<li class="nav-item"><a class="nav-link" href="#"
-							th:href="@{/seller/manage/{id}(id=${user.getId()})}"
-							sec:authorize="hasRole('ROLE_SELLER')">Manage</a></li>
+					<li class="nav-item"><a class="nav-link" href="#" th:href="@{/seller/manage/{id}(id=${user?.id})}" sec:authorize="hasRole('ROLE_SELLER')">Manage</a></li>
 
 				</ul>
 				<form th:action="@{/signin}" sec:authorize="!isAuthenticated()">
@@ -54,7 +52,7 @@
 				</form>
 
 				<form class="d-flex" sec:authorize="hasRole('ROLE_USER')">
-					<a class="btn btn-outline-dark" href="#" th:text="|현재잔액 : ${user.getCoin()} ₩|">
+					<a class="btn btn-outline-dark" th:if="${user != null}" href="#" th:text="|현재잔액 : ${user.coin} ₩|">
 						현재잔액 : 10000 ₩
 					</a>
 					<a class="btn btn-outline-dark" th:href="@{/user/cart/{id}(id=${user.getId()})}">
@@ -94,7 +92,8 @@
 				<div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" th:src="@{${item.getImgPath()}}"
 						alt="..." /></div>
 				<div class="col-md-6">
-					<div class="small mb-1" th:text="|판매자 : ${item.getSeller().getUsername()}|">판매자 이름</div>
+					<div class="small mb-1" th:if="${item.seller != null}" th:text="|판매자 : ${item.seller.username}|">판매자 이름</div>
+					<div class="small mb-1" th:unless="${item.seller != null}" th:text="'판매자 정보 없음'">판매자 없음</div>
 					<div class="small mb-1" th:if="${item.getIsSoldout()} == 0" th:text="|재고 : ${item.getStock()}개|">재고
 					</div>
 					<div class="small mb-1" th:unless="${item.getIsSoldout()} == 0" th:text="|품절|">재고</div>
@@ -178,7 +177,8 @@
 
 						function orderitem() {
 							var count = document.getElementById("count").value
-							var userMoney = [[${user.Coin}]];
+							var userMoney = /*[[${user != null ? user.coin : 0}]]*/ 0;
+
 							var itemPrice = [[${item.Price}]];
 							if (isNaN(count)) {
 								alert("숫자를 입력해주세요.")

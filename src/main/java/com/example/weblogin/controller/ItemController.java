@@ -8,6 +8,7 @@ import com.example.weblogin.domain.user.User;
 import com.example.weblogin.service.CartService;
 import com.example.weblogin.service.ItemService;
 import com.example.weblogin.service.UserPageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,8 +43,12 @@ public class ItemController {
                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
         List<Item> items = itemService.allItemView();
         model.addAttribute("items", items);
-        model.addAttribute("user",
-            userPageService.findUser(principalDetails.getUser().getId()));
+
+        if (principalDetails != null) {
+            model.addAttribute("user",
+                    userPageService.findUser(principalDetails.getUser().getId()));
+        }
+
         return "/main";
     }
 
@@ -57,13 +63,14 @@ public class ItemController {
     }
 
     @PostMapping("/item/new/pro")
-    public String itemSave(Item item,
+    public String saveItem(@Valid @ModelAttribute Item item,
+                           BindingResult bindingResult,
                            @AuthenticationPrincipal PrincipalDetails principalDetails,
-                           MultipartFile imgFile) throws Exception {
-        if (!principalDetails.getUser().getRole().equals("ROLE_SELLER")) {
-            return "redirect:/main";
+                           @RequestParam("imgFile") MultipartFile imgFile) throws Exception {
+        if (bindingResult.hasErrors()) {
+            return "/seller/itemForm";
         }
-        item.setSeller(principalDetails.getUser());
+
         itemService.saveItem(item, imgFile);
         return "redirect:/main";
     }
@@ -75,72 +82,91 @@ public class ItemController {
         if (!principalDetails.getUser().getRole().equals("ROLE_SELLER")) {
             return "redirect:/main";
         }
+
         User seller = itemService.itemView(id).getSeller();
         if (seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
+
         model.addAttribute("item", itemService.itemView(id));
         model.addAttribute("user", principalDetails.getUser());
         return "/seller/itemModify";
     }
 
     @PostMapping("/item/modify/pro/{id}")
-    public String itemModify(Item item,
+    public String itemModify(@ModelAttribute Item item,
                              @PathVariable("id") Integer id,
                              @AuthenticationPrincipal PrincipalDetails principalDetails,
-                             MultipartFile imgFile) throws Exception {
+                             @RequestParam("imgFile") MultipartFile imgFile) throws Exception {
         if (!principalDetails.getUser().getRole().equals("ROLE_SELLER")) {
             return "redirect:/main";
         }
+
         User seller = itemService.itemView(id).getSeller();
         if (seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
+
         itemService.itemModify(item, id, imgFile);
         return "redirect:/main";
     }
 
     @GetMapping("/item/view/{itemId}")
-    public String ItemView(Model model,
-                           @PathVariable("itemId") Integer id,
+    public String itemView(Model model,
+                           @PathVariable("itemId") Integer itemId,
                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        User user = principalDetails.getUser();
-        model.addAttribute("item", itemService.itemView(id));
-        model.addAttribute("user", user);
+        Item item = itemService.itemView(itemId);
+        model.addAttribute("item", item);
 
-        if (!user.getRole().equals("ROLE_SELLER")) {
-            Cart userCart = cartService.findUserCart(user.getId());
-            int cartCount = cartService.allUserCartView(userCart)
-                                .stream()
-                                .mapToInt(CartItem::getCount)
-                                .sum();
-            model.addAttribute("cartCount", cartCount);
+        if (principalDetails != null) {
+            User user = principalDetails.getUser();
+            model.addAttribute("user", user);
+
+            if (!user.getRole().equals("ROLE_SELLER")) {
+                Cart userCart = cartService.findUserCart(user.getId());
+                int cartCount = cartService.allUserCartView(userCart)
+                        .stream().mapToInt(CartItem::getCount).sum();
+                model.addAttribute("cartCount", cartCount);
+            }
         }
+
+        model.addAttribute("sellerUsername",
+                item.getSeller() != null ? item.getSeller().getUsername() : "알 수 없음");
+
         return "itemView";
     }
 
     @GetMapping("/item/view/nonlogin/{id}")
     public String nonLoginItemView(Model model,
                                    @PathVariable("id") Integer id) {
-        model.addAttribute("item", itemService.itemView(id));
+        Item item = itemService.itemView(id);
+        model.addAttribute("item", item);
+
+        if (item.getSeller() != null) {
+            model.addAttribute("sellerUsername", item.getSeller().getUsername());
+        } else {
+            model.addAttribute("sellerUsername", "알 수 없음");
+        }
+
         return "itemView";
     }
 
     @GetMapping("/item/delete/{id}")
     public String itemDelete(@PathVariable("id") Integer id,
                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        if (!principalDetails.getUser().getRole().equals("ROLE_SELLER")) {
+        if (principalDetails == null ||
+            !principalDetails.getUser().getRole().equals("ROLE_SELLER")) {
             return "redirect:/main";
         }
+
         User seller = itemService.itemView(id).getSeller();
         if (seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
+
         itemService.itemDelete(id);
         return "redirect:/main";
     }
-
-    // ========== 수정된 검색+페이징 처리 메서드 ==========
 
     @GetMapping("/item/list")
     public String itemList(Model model,
