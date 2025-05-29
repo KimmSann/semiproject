@@ -71,6 +71,9 @@ public class ItemController {
             return "/seller/itemForm";
         }
 
+        // seller 설정
+        item.setSeller(principalDetails.getUser());
+
         itemService.saveItem(item, imgFile);
         return "redirect:/main";
     }
@@ -83,12 +86,13 @@ public class ItemController {
             return "redirect:/main";
         }
 
-        User seller = itemService.itemView(id).getSeller();
-        if (seller.getId() != principalDetails.getUser().getId()) {
+        Item item = itemService.itemView(id);
+        User seller = item.getSeller();
+        if (seller == null || seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
 
-        model.addAttribute("item", itemService.itemView(id));
+        model.addAttribute("item", item);
         model.addAttribute("user", principalDetails.getUser());
         return "/seller/itemModify";
     }
@@ -102,8 +106,9 @@ public class ItemController {
             return "redirect:/main";
         }
 
-        User seller = itemService.itemView(id).getSeller();
-        if (seller.getId() != principalDetails.getUser().getId()) {
+        Item existingItem = itemService.itemView(id);
+        User seller = existingItem.getSeller();
+        if (seller == null || seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
 
@@ -142,11 +147,8 @@ public class ItemController {
         Item item = itemService.itemView(id);
         model.addAttribute("item", item);
 
-        if (item.getSeller() != null) {
-            model.addAttribute("sellerUsername", item.getSeller().getUsername());
-        } else {
-            model.addAttribute("sellerUsername", "알 수 없음");
-        }
+        model.addAttribute("sellerUsername",
+                item.getSeller() != null ? item.getSeller().getUsername() : "알 수 없음");
 
         return "itemView";
     }
@@ -159,8 +161,9 @@ public class ItemController {
             return "redirect:/main";
         }
 
-        User seller = itemService.itemView(id).getSeller();
-        if (seller.getId() != principalDetails.getUser().getId()) {
+        Item item = itemService.itemView(id);
+        User seller = item.getSeller();
+        if (seller == null || seller.getId() != principalDetails.getUser().getId()) {
             return "redirect:/main";
         }
 

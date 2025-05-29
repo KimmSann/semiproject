@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-// 판매자에 해당하는 페이지 관리
-// 판매자페이지, 상품관리, 판매내역
-
 @RequiredArgsConstructor
 @Controller
 public class SellerPageController {
@@ -33,27 +30,23 @@ public class SellerPageController {
     @GetMapping("/seller/{id}")
     public String sellerPage(@PathVariable("id") Integer id, Model model, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails.getUser().getId() == id) {
-            // 로그인이 되어있는 판매자의 id와 판매자 페이지에 접속하는 id가 같아야 함
             model.addAttribute("user", userPageService.findUser(id));
-
             return "/seller/sellerPage";
         } else {
             return "redirect:/main";
         }
-
     }
 
     // 상품 관리 페이지
     @GetMapping("/seller/manage/{id}")
     public String itemManage(@PathVariable("id") Integer id, Model model, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        if(principalDetails.getUser().getId() == id) {
-            // 로그인이 되어있는 판매자의 id와 상품관리 페이지에 접속하는 id가 같아야 함
+        if (principalDetails.getUser().getId() == id) {
             List<Item> allItem = itemService.allItemView();
             List<Item> userItem = new ArrayList<>();
 
-            // 자신이 올린 상품만 가져오기
-            for(Item item : allItem) {
-                if(item.getSeller().getId() == id) {
+            // 자신이 올린 상품만 가져오기 (null 체크 추가)
+            for (Item item : allItem) {
+                if (item.getSeller() != null && item.getSeller().getId() == id) {
                     userItem.add(item);
                 }
             }
@@ -69,21 +62,18 @@ public class SellerPageController {
 
     // 판매 내역 조회 페이지
     @GetMapping("/seller/salelist/{id}")
-    public String saleList(@PathVariable("id")Integer id, Model model, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        // 로그인이 되어있는 유저의 id와 판매내역에 접속하는 id가 같아야 함
+    public String saleList(@PathVariable("id") Integer id, Model model, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails.getUser().getId() == id) {
-
             Sale sales = saleService.findSaleById(id);
             List<SaleItem> saleItemList = saleService.findSellerSaleItems(id);
 
             model.addAttribute("sales", sales);
-            model.addAttribute("totalCount", sales.getTotalCount());
+            model.addAttribute("totalCount", sales != null ? sales.getTotalCount() : 0);
             model.addAttribute("sellerSaleItems", saleItemList);
             model.addAttribute("seller", userPageService.findUser(id));
 
             return "seller/saleList";
-        }
-        else {
+        } else {
             return "redirect:/main";
         }
     }
