@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +78,16 @@ public class UserPageController {
     }
 
     @PostMapping("/user/cart/{id}/{itemId}")
-    public String addCartItem(@PathVariable("id") Integer id, @PathVariable("itemId") Integer itemId, int amount) {
+    public String addCartItem(
+            @PathVariable("id") Integer id,
+            @PathVariable("itemId") Integer itemId,
+            @RequestParam(name = "amount", defaultValue = "1") int amount) {
+        
         User user = userPageService.findUser(id);
         Item item = itemService.itemView(itemId);
         cartService.addCart(user, item, amount);
         return "redirect:/item/view/" + itemId;
     }
-
     @GetMapping("/user/cart/{id}/{cartItemId}/delete")
     public String deleteCartItem(@PathVariable("id") Integer id, @PathVariable("cartItemId") Integer itemId, Model model, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails.getUser().getId() != id) {
