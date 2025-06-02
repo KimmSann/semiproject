@@ -116,7 +116,7 @@ public class ItemController {
         return "redirect:/main";
     }
 
-    @GetMapping("/item/view/{itemId}")
+    @GetMapping("/item/view/{itemId:\\d+}")
     public String itemView(Model model,
                            @PathVariable("itemId") Integer itemId,
                            @AuthenticationPrincipal PrincipalDetails principalDetails) {

@@ -39,18 +39,10 @@
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" th:href="@{/user/{id}(id=${user.getId()})}">마이페이지</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" th:href="@{/user/cart/{id}(id=${user.getId()})}">장바구니</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/user/orderHist/{id}(id=${user.getId()})}">주문내역</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/user/cash/{id}(id=${user.getId()})}">충전하기</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/user/{id}(id=${user.getId()})}">마이페이지</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/user/cart/{id}(id=${user.getId()})}">장바구니</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/user/orderHist/{id}(id=${user.getId()})}">주문내역</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/user/cash/{id}(id=${user.getId()})}">충전하기</a></li>
                 </ul>
             </div>
         </nav>
@@ -76,13 +68,13 @@
                     <tbody>
                         <tr th:each="cartItem, i : ${cartItems}">
                             <td th:text="${i.count}"></td>
-                            <td th:text="${cartItem.getItem().getId()}"></td>
-                            <td th:text="${cartItem.getItem().getName()}"></td>
-                            <td th:text="${cartItem.getCount()}"></td>
-                            <td th:text="${cartItem.getItem().getPrice() * cartItem.getCount()}"></td>
-                            <td th:text="${cartItem.getCart().getCreateDate()}"></td>
+                            <td th:text="${cartItem.item.id}"></td>
+                            <td th:text="${cartItem.item.name}"></td>
+                            <td th:text="${cartItem.count}"></td>
+                            <td th:text="${cartItem.item.price * cartItem.count}"></td>
+                            <td th:text="${cartItem.cart.createDate}"></td>
                             <td>
-                                <a class="btn btn-outline-dark" th:href="@{/user/cart/{id}/{cartItemId}/delete(id=${cartItem.getCart().getUser().id}, cartItemId=${cartItem.getId()})}">삭제</a>
+                                <a class="btn btn-outline-dark" th:href="@{/user/cart/{id}/{cartItemId}/delete(id=${user.id}, cartItemId=${cartItem.id})}">삭제</a>
                             </td>
                         </tr>
                     </tbody>
@@ -96,7 +88,7 @@
                             <h4 class="my-0 fw-normal">총 수량</h4>
                         </div>
                         <div class="card-body">
-                            <h1 class="card-title pricing-card-title" th:text="|${user.getCart().getCount()} 개|"></h1>
+                            <h1 class="card-title pricing-card-title" th:text="|${user.cart.count} 개|"></h1>
                         </div>
                     </div>
                 </div>
@@ -108,12 +100,14 @@
                         <div class="card-header py-3">
                             <h4 class="my-0 fw-normal">총 결제금액</h4>
                         </div>
-                        <form class="card-body" th:action="@{/user/cart/{id}/buy(id=${user.getId()})}" method="get">
-                            <h1 class="card-title pricing-card-title" th:text="|${totalPrice} ₩|"></h1>
-                            <ul class="list-unstyled mt-3 mb-4">
-                                <li>잘못 담은 물건이 있는지 확인해보세요!</li>
-                            </ul>
-                            <button type="submit" class="w-100 btn btn-lg btn-outline-primary">구매하기</button>
+                        <form class="card-body" th:action="@{/user/cart/{id}/buy(id=${user.id})}" method="post">
+    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <h1 class="card-title pricing-card-title" th:text="|${totalPrice} ₩|"></h1>
+    <ul class="list-unstyled mt-3 mb-4">
+        <li>잘못 담은 물건이 있는지 확인해보세요!</li>
+    </ul>
+    <button type="submit" class="w-100 btn btn-lg btn-outline-primary">구매하기</button>
+</form>
                         </form>
                     </div>
                 </div>
